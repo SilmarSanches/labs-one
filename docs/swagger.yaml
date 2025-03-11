@@ -1,0 +1,54 @@
+basePath: /
+definitions:
+  entities.CustomError:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  entities.GetTempoResponseDto:
+    properties:
+      temp_C:
+        type: number
+      temp_F:
+        type: number
+      temp_K:
+        type: number
+    type: object
+info:
+  contact: {}
+  description: Tudo Azul Temperaturas
+  title: Tudo Azul API
+  version: "1.0"
+paths:
+  /get-temp:
+    get:
+      consumes:
+      - application/json
+      description: Consulta a temperatura atual baseada no CEP fornecido
+      parameters:
+      - description: CEP
+        in: query
+        name: cep
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.GetTempoResponseDto'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/entities.CustomError'
+        "422":
+          description: Invalid Zipcode
+          schema:
+            $ref: '#/definitions/entities.CustomError'
+      summary: Consulta temperatura baseado no CEP
+      tags:
+      - Labs-One
+swagger: "2.0"

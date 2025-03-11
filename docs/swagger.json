@@ -1,0 +1,83 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Tudo Azul Temperaturas",
+        "title": "Tudo Azul API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/",
+    "paths": {
+        "/get-temp": {
+            "get": {
+                "description": "Consulta a temperatura atual baseada no CEP fornecido",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Labs-One"
+                ],
+                "summary": "Consulta temperatura baseado no CEP",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "CEP",
+                        "name": "cep",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entities.GetTempoResponseDto"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/entities.CustomError"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid Zipcode",
+                        "schema": {
+                            "$ref": "#/definitions/entities.CustomError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "entities.CustomError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.GetTempoResponseDto": {
+            "type": "object",
+            "properties": {
+                "temp_C": {
+                    "type": "number"
+                },
+                "temp_F": {
+                    "type": "number"
+                },
+                "temp_K": {
+                    "type": "number"
+                }
+            }
+        }
+    }
+}
