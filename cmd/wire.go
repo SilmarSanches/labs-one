@@ -4,6 +4,7 @@
 package main
 
 import (
+	"net/http"
 	"labs-one/config"
 	"labs-one/internal/infra/services"
 	"labs-one/internal/infra/web"
@@ -15,7 +16,9 @@ import (
 var ProviderConfig = wire.NewSet(config.ProvideConfig)
 
 var ProviderCep = wire.NewSet(
+	services.NewHttpClient,
 	services.NewServiceCep,
+	wire.Bind(new(services.HttpClient), new(*http.Client)),
 	wire.Bind(new(services.ServiceCepInterface), new(*services.ServiceCep)),
 )
 

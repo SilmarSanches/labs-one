@@ -12,6 +12,11 @@ import (
 	"labs-one/internal/infra/services"
 	"labs-one/internal/infra/web"
 	"labs-one/internal/usecases"
+	"net/http"
+)
+
+import (
+	_ "labs-one/docs"
 )
 
 // Injectors from wire.go:
@@ -23,7 +28,8 @@ func NewConfig() *config.AppSettings {
 
 func NewGetTempUseCase() *usecases.GetTempoUseCase {
 	appSettings := config.ProvideConfig()
-	serviceCep := services.NewServiceCep(appSettings)
+	client := services.NewHttpClient()
+	serviceCep := services.NewServiceCep(client, appSettings)
 	serviceTempo := services.NewServiceTempo(appSettings)
 	getTempoUseCase := usecases.NewGetTempoUseCase(appSettings, serviceCep, serviceTempo)
 	return getTempoUseCase
@@ -31,7 +37,8 @@ func NewGetTempUseCase() *usecases.GetTempoUseCase {
 
 func NewGetTempoHandler() *web.GetTempoHandler {
 	appSettings := config.ProvideConfig()
-	serviceCep := services.NewServiceCep(appSettings)
+	client := services.NewHttpClient()
+	serviceCep := services.NewServiceCep(client, appSettings)
 	serviceTempo := services.NewServiceTempo(appSettings)
 	getTempoUseCase := usecases.NewGetTempoUseCase(appSettings, serviceCep, serviceTempo)
 	getTempoHandler := web.NewGetTempoHandler(appSettings, getTempoUseCase, serviceCep, serviceTempo)
@@ -42,7 +49,7 @@ func NewGetTempoHandler() *web.GetTempoHandler {
 
 var ProviderConfig = wire.NewSet(config.ProvideConfig)
 
-var ProviderCep = wire.NewSet(services.NewServiceCep, wire.Bind(new(services.ServiceCepInterface), new(*services.ServiceCep)))
+var ProviderCep = wire.NewSet(services.NewHttpClient, services.NewServiceCep, wire.Bind(new(services.HttpClient), new(*http.Client)), wire.Bind(new(services.ServiceCepInterface), new(*services.ServiceCep)))
 
 var ProviderTempo = wire.NewSet(services.NewServiceTempo, wire.Bind(new(services.ServiceTempoInterface), new(*services.ServiceTempo)))
 

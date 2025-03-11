@@ -13,21 +13,29 @@ import (
 	"time"
 )
 
+type HttpClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 type ServiceCepInterface interface {
 	GetCep(ctx context.Context, cep string) (entities.ViaCepDto, error)
 }
 
 type ServiceCep struct {
-	HttpClient *http.Client
+	HttpClient HttpClient
 	appConfig  *config.AppSettings
 }
 
-func NewServiceCep(appConfig *config.AppSettings) *ServiceCep {
+func NewHttpClient() *http.Client {
+	return &http.Client{
+		Timeout: 5 * time.Second,
+	}
+}
+
+func NewServiceCep(httpClient HttpClient, appConfig *config.AppSettings) *ServiceCep {
 	return &ServiceCep{
-		HttpClient: &http.Client{
-			Timeout: 5 * time.Second,
-		},
-		appConfig: appConfig,
+		HttpClient: httpClient,
+		appConfig:  appConfig,
 	}
 }
 
@@ -61,13 +69,13 @@ func (s *ServiceCep) GetCep(ctx context.Context, cep string) (entities.ViaCepDto
 	}(res.Body)
 
 	if res.StatusCode != http.StatusOK {
-		return entities.ViaCepDto{}, errors.New("erro ao consultar o serviço ViaCep: " + res.Status)
+		return entities.ViaCepDto{}, fmt.Errorf("erro ao consultar o serviço ViaCep: %d", res.StatusCode)
 	}
 
 	var data entities.ViaCepDto
 	err = json.NewDecoder(res.Body).Decode(&data)
 	if err != nil {
-		return entities.ViaCepDto{}, err
+		return entities.ViaCepDto{}, fmt.Errorf("erro ao decodificar resposta JSON do ViaCep: %w", err)
 	}
 
 	return data, nil
