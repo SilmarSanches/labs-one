@@ -4,7 +4,6 @@
 package main
 
 import (
-	"net/http"
 	"labs-one/config"
 	"labs-one/internal/infra/services"
 	"labs-one/internal/infra/web"
@@ -15,16 +14,25 @@ import (
 
 var ProviderConfig = wire.NewSet(config.ProvideConfig)
 
+var ProviderHttpClient = wire.NewSet(
+    services.NewHttpClient,
+)
+
 var ProviderCep = wire.NewSet(
-	services.NewHttpClient,
-	services.NewServiceCep,
-	wire.Bind(new(services.HttpClient), new(*http.Client)),
-	wire.Bind(new(services.ServiceCepInterface), new(*services.ServiceCep)),
+    services.NewServiceCep,
+    wire.Bind(new(services.ServiceCepInterface), new(*services.ServiceCep)),
 )
 
 var ProviderTempo = wire.NewSet(
-	services.NewServiceTempo,
-	wire.Bind(new(services.ServiceTempoInterface), new(*services.ServiceTempo)),
+    services.NewServiceTempo,
+    wire.Bind(new(services.ServiceTempoInterface), new(*services.ServiceTempo)),
+)
+
+var ProviderGlobal = wire.NewSet(
+    ProviderHttpClient,
+    ProviderConfig,
+    ProviderCep,
+    ProviderTempo,
 )
 
 var ProviderUseCase = wire.NewSet(
@@ -40,11 +48,11 @@ func NewConfig() *config.AppSettings {
 }
 
 func NewGetTempUseCase() *usecases.GetTempoUseCase {
-	wire.Build(ProviderConfig, ProviderCep, ProviderTempo, ProviderUseCase)
-	return &usecases.GetTempoUseCase{}
+    wire.Build(ProviderGlobal, ProviderUseCase)
+    return &usecases.GetTempoUseCase{}
 }
 
 func NewGetTempoHandler() *web.GetTempoHandler {
-	wire.Build(ProviderConfig, ProviderCep, ProviderTempo, ProviderUseCase, ProviderHandler)
-	return &web.GetTempoHandler{}
+    wire.Build(ProviderGlobal, ProviderUseCase, ProviderHandler)
+    return &web.GetTempoHandler{}
 }

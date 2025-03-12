@@ -13,21 +13,19 @@ import (
 	"time"
 )
 
-type ServiceTempoInterface interface{
+type ServiceTempoInterface interface {
 	GetTempo(ctx context.Context, cidade string) (entities.TempoDto, error)
 }
 
 type ServiceTempo struct {
-	HttpClient *http.Client
-	appConfig *config.AppSettings
+	HttpClient HttpClient
+	appConfig  *config.AppSettings
 }
 
-func NewServiceTempo(appConfig *config.AppSettings) *ServiceTempo {
+func NewServiceTempo(httpClient HttpClient, appConfig *config.AppSettings) *ServiceTempo {
 	return &ServiceTempo{
-		HttpClient: &http.Client{
-			Timeout: 5 * time.Second,
-		},
-		appConfig: appConfig,
+		HttpClient: httpClient,
+		appConfig:  appConfig,
 	}
 }
 
@@ -62,7 +60,7 @@ func (s *ServiceTempo) GetTempo(ctx context.Context, cidade string) (entities.Te
 	}(res.Body)
 
 	if res.StatusCode != http.StatusOK {
-		return entities.TempoDto{}, errors.New("erro ao consultar o serviço weatherapi: " + res.Status)
+		return entities.TempoDto{}, fmt.Errorf("erro ao consultar o serviço weatherapi: %v", res.StatusCode)
 	}
 
 	var data entities.TempoDto

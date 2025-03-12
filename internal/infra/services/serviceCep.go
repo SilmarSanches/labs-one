@@ -13,10 +13,6 @@ import (
 	"time"
 )
 
-type HttpClient interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
 type ServiceCepInterface interface {
 	GetCep(ctx context.Context, cep string) (entities.ViaCepDto, error)
 }
@@ -24,12 +20,6 @@ type ServiceCepInterface interface {
 type ServiceCep struct {
 	HttpClient HttpClient
 	appConfig  *config.AppSettings
-}
-
-func NewHttpClient() *http.Client {
-	return &http.Client{
-		Timeout: 5 * time.Second,
-	}
 }
 
 func NewServiceCep(httpClient HttpClient, appConfig *config.AppSettings) *ServiceCep {
@@ -61,12 +51,14 @@ func (s *ServiceCep) GetCep(ctx context.Context, cep string) (entities.ViaCepDto
 		return entities.ViaCepDto{}, errors.New("resposta nula ao consultar o viacep")
 	}
 
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Printf("erro ao fechar o corpo da resposta ViaCep: %v", err)
-		}
-	}(res.Body)
+	if res.Body != nil {
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+				fmt.Printf("erro ao fechar o corpo da resposta ViaCep: %v", err)
+			}
+		}(res.Body)
+	}
 
 	if res.StatusCode != http.StatusOK {
 		return entities.ViaCepDto{}, fmt.Errorf("erro ao consultar o serviço ViaCep: %d", res.StatusCode)

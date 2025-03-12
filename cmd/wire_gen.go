@@ -12,7 +12,6 @@ import (
 	"labs-one/internal/infra/services"
 	"labs-one/internal/infra/web"
 	"labs-one/internal/usecases"
-	"net/http"
 )
 
 import (
@@ -28,18 +27,18 @@ func NewConfig() *config.AppSettings {
 
 func NewGetTempUseCase() *usecases.GetTempoUseCase {
 	appSettings := config.ProvideConfig()
-	client := services.NewHttpClient()
-	serviceCep := services.NewServiceCep(client, appSettings)
-	serviceTempo := services.NewServiceTempo(appSettings)
+	httpClient := services.NewHttpClient()
+	serviceCep := services.NewServiceCep(httpClient, appSettings)
+	serviceTempo := services.NewServiceTempo(httpClient, appSettings)
 	getTempoUseCase := usecases.NewGetTempoUseCase(appSettings, serviceCep, serviceTempo)
 	return getTempoUseCase
 }
 
 func NewGetTempoHandler() *web.GetTempoHandler {
 	appSettings := config.ProvideConfig()
-	client := services.NewHttpClient()
-	serviceCep := services.NewServiceCep(client, appSettings)
-	serviceTempo := services.NewServiceTempo(appSettings)
+	httpClient := services.NewHttpClient()
+	serviceCep := services.NewServiceCep(httpClient, appSettings)
+	serviceTempo := services.NewServiceTempo(httpClient, appSettings)
 	getTempoUseCase := usecases.NewGetTempoUseCase(appSettings, serviceCep, serviceTempo)
 	getTempoHandler := web.NewGetTempoHandler(appSettings, getTempoUseCase, serviceCep, serviceTempo)
 	return getTempoHandler
@@ -49,9 +48,18 @@ func NewGetTempoHandler() *web.GetTempoHandler {
 
 var ProviderConfig = wire.NewSet(config.ProvideConfig)
 
-var ProviderCep = wire.NewSet(services.NewHttpClient, services.NewServiceCep, wire.Bind(new(services.HttpClient), new(*http.Client)), wire.Bind(new(services.ServiceCepInterface), new(*services.ServiceCep)))
+var ProviderHttpClient = wire.NewSet(services.NewHttpClient)
+
+var ProviderCep = wire.NewSet(services.NewServiceCep, wire.Bind(new(services.ServiceCepInterface), new(*services.ServiceCep)))
 
 var ProviderTempo = wire.NewSet(services.NewServiceTempo, wire.Bind(new(services.ServiceTempoInterface), new(*services.ServiceTempo)))
+
+var ProviderGlobal = wire.NewSet(
+	ProviderHttpClient,
+	ProviderConfig,
+	ProviderCep,
+	ProviderTempo,
+)
 
 var ProviderUseCase = wire.NewSet(usecases.NewGetTempoUseCase, wire.Bind(new(usecases.GetTempoUseCaseInterface), new(*usecases.GetTempoUseCase)))
 
