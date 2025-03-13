@@ -2,10 +2,22 @@
 GET http://localhost:8080/get-temp?cep=06465-135
 Accept: application/json
 
+### Teste de Sucesso :::Cloud:::
+GET https://labs-one-1008210695250.us-central1.run.app/get-temp?cep=06465-135
+Accept: application/json
+
 ### Teste de Falha - CEP inválido (menos de 8 dígitos)
 GET http://localhost:8080/get-temp?cep=12345
 Accept: application/json
 
+### teste de Falha - CEP inválido (menos de 8 dígitos) :::Cloud:::
+GET https://labs-one-1008210695250.us-central1.run.app/get-temp?cep=12345
+Accept: application/json
+
 ### Teste de Falha - CEP não encontrado
 GET http://localhost:8080/get-temp?cep=00000-000
+Accept: application/json
+
+### Teste de Falha - CEP não encontrado :::Cloud:::
+GET https://labs-one-1008210695250.us-central1.run.app/get-temp?cep=00000-000
 Accept: application/json
