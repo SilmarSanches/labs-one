@@ -35,7 +35,7 @@ func (s *ServiceTempo) GetTempo(ctx context.Context, cidade string) (entities.Te
 	defer cancel()
 
 	cidadeEncoded := url.QueryEscape(cidade)
-	url := s.appConfig.UrlTempo + "/current.json?q=" + cidadeEncoded + "&key=" + s.appConfig.TempoApiKey
+	url := fmt.Sprintf("%s/current.json?q=%s&key=%s", s.appConfig.UrlTempo, cidadeEncoded, s.appConfig.TempoApiKey)
 	log.Println("url:", url)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)

@@ -34,7 +34,7 @@ func (s *ServiceCep) GetCep(ctx context.Context, cep string) (entities.ViaCepDto
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	url := s.appConfig.UrlCep + "/" + cep + "/json"
+	url := fmt.Sprintf("%s/%s/json", s.appConfig.UrlCep, cep)
 	log.Println("url:", url)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)

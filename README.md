@@ -14,3 +14,5 @@ docker run -p 8080:8080 \
 
 
 https://labs-one-1008210695250.us-central1.run.app
+https://labs-one-l5e2u7s2ca-uc.a.run.app
+
