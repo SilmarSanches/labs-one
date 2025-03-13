@@ -8,6 +8,7 @@ import (
 	"io"
 	"labs-one/config"
 	"labs-one/internal/entities"
+	"log"
 
 	"net/http"
 	"time"
@@ -34,20 +35,27 @@ func (s *ServiceCep) GetCep(ctx context.Context, cep string) (entities.ViaCepDto
 	defer cancel()
 
 	url := s.appConfig.UrlCep + "/" + cep + "/json"
+	log.Println("url:", url)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
+		log.Println("erro ao criar requisição HTTP:", err)
 		return entities.ViaCepDto{}, err
 	}
 
 	res, err := s.HttpClient.Do(req)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
+			log.Println("timeout de 5s excedido ao consultar o serviço ViaCep:", err)
 			return entities.ViaCepDto{}, fmt.Errorf("timeout de 5s excedido ao consultar o serviço ViaCep: %v", err)
 		}
 	}
 
 	if res == nil {
+		log.Println("resposta nula ao consultar o viacep")
+		if err != nil {
+			log.Println("erro ao consultar o serviço ViaCep:", err)
+		}
 		return entities.ViaCepDto{}, errors.New("resposta nula ao consultar o viacep")
 	}
 
@@ -61,12 +69,14 @@ func (s *ServiceCep) GetCep(ctx context.Context, cep string) (entities.ViaCepDto
 	}
 
 	if res.StatusCode != http.StatusOK {
+		log.Println("erro ao consultar o serviço ViaCep:", res.StatusCode)
 		return entities.ViaCepDto{}, fmt.Errorf("erro ao consultar o serviço ViaCep: %d", res.StatusCode)
 	}
 
 	var data entities.ViaCepDto
 	err = json.NewDecoder(res.Body).Decode(&data)
 	if err != nil {
+		log.Println("erro ao decodificar resposta JSON do ViaCep:", err)
 		return entities.ViaCepDto{}, fmt.Errorf("erro ao decodificar resposta JSON do ViaCep: %w", err)
 	}
 
